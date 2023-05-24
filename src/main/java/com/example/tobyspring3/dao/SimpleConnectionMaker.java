@@ -7,20 +7,17 @@ import java.util.Map;
 
 import static java.lang.System.getenv;
 
-public class SimpleConnectionMaker {
-    public Connection makeNewConnection() throws SQLException, ClassNotFoundException {
+public class SimpleConnectionMaker implements ConnectionMaker {
+    @Override
+    public Connection makeConnection() throws ClassNotFoundException, SQLException {
         Map<String, String> env = getenv();
-
-        String dbHost = env.get("DB_HOST");
-        String dbUser = env.get("DB_USER");
-        String dbPassword = env.get("DB_PASSWORD");
-
+        String dbHost = env.get("DB_host");
+        String dbUser = env.get("DB_user");
+        String dbPassword = env.get("DB_password");
         Class.forName("com.mysql.cj.jdbc.Driver");
-
         Connection conn = DriverManager.getConnection(
                 dbHost, dbUser, dbPassword
         );
-        // conn 은 db를 연결해주는 값을 반환해줌
         return conn;
     }
 }
