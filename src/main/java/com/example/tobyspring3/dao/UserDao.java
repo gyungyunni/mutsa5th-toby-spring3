@@ -7,7 +7,9 @@ import java.util.Map;
 
 import static java.lang.System.getenv;
 
-public class UserDao {
+public abstract class UserDao {
+
+    public abstract Connection getConnection() throws ClassNotFoundException, SQLException;
     public void add(User user) throws ClassNotFoundException, SQLException {
         Map<String, String> env = getenv();
         String dbHost = env.get("DB_HOST"); //DB_HOST=jdbc:mysql://localhost:3306/spring-db
@@ -58,9 +60,9 @@ public class UserDao {
     }
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        UserDao userDao = new UserDao();
+        UserDao userDao = new NUserDao();
         User user = new User();
-        user.setId("3");
+        user.setId("4");
         user.setName("KIM");
         user.setPassword("1234");
         userDao.add(user);
