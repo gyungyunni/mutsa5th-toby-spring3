@@ -5,56 +5,58 @@ import com.example.tobyspring3.domain.User;
 import java.sql.*;
 
 public class UserDao {
-    SimpleConnectionMaker connectionMaker = new SimpleConnectionMaker();
     ConnectionMaker connectionMaker;
 
-    public UserDao() {
-        this.connectionMaker = new DConnectionMaker();
+    public UserDao(ConnectionMaker connectionMaker) {
+        this.connectionMaker = connectionMaker;
     }
 
     public void add(User user) throws ClassNotFoundException, SQLException {
-        Connection conn = connectionMaker.makeNewConnection();
         Connection conn = connectionMaker.makeConnection();
+
         PreparedStatement pstmt = conn.prepareStatement("insert into users(id, name, password) values(?, ?, ?)");
         pstmt.setString(1, user.getId());
         pstmt.setString(2, user.getName());
-        public void add (User user) throws ClassNotFoundException, SQLException {
+        pstmt.setString(3, user.getPassword());
 
+        pstmt.executeUpdate(); //insert 실행
+        pstmt.close();
+        conn.close();
 
-            public User get (String id) throws SQLException, ClassNotFoundException {
-                Connection conn = connectionMaker.makeNewConnection();
-                Connection conn = connectionMaker.makeConnection();
+    }
 
-                PreparedStatement psmt = conn.prepareStatement("select id, name, password from users where id = ?");
-                psmt.setString(1, id);
-                ResultSet rs = psmt.executeQuery();
-                rs.next();// same as ctrl + enter
-                User user = new User();
-                user.setId(rs.getString("id"));
-                user.setName(rs.getString("name"));
-                user.setPassword(rs.getString("password"));
-                rs.close();
-                psmt.close();
-                conn.close();
-                return user;
-            }
-            public static void main (String[]args) throws SQLException, ClassNotFoundException {
-                UserDao userDao = new UserDao();
-        /*
-        User 추가 예시:
+    public User get(String id) throws ClassNotFoundException, SQLException {
+        Connection conn = connectionMaker.makeConnection();
+
+        PreparedStatement pstmt = conn.prepareStatement("select id, name, password from users where id = ?");
+        pstmt.setString(1, id);
+        ResultSet rs = pstmt.executeQuery();
+        rs.next(); //ctrl + enter (실행)
+
         User user = new User();
-        user.setId("2");
-        user.setName("moon");
+        user.setId(rs.getString("id"));
+        user.setName(rs.getString("name"));
+        user.setPassword(rs.getString("password"));
+
+        rs.close();
+        pstmt.close();
+        conn.close(); //커넥션 풀이 꽉 차면 장애가 생김
+
+        return user;
+    }
+
+    public static void main(String[] args) throws SQLException, ClassNotFoundException {
+        ConnectionMaker cm = new DConnectionMaker();
+        UserDao userDao = new UserDao(cm);
+        User user = new User();
+        user.setId("7");
+        user.setName("kyeongrok");
         user.setPassword("1234");
-        */
-        /*
-        User select 예시:
-         */
-                User user = userDao.get("1");
-                System.out.println(user.getId());
-                System.out.println(user.getName());
-                System.out.println(user.getPassword());
-            }
-        }
+        userDao.add(user);
+
+        User selectedUser = userDao.get("7");
+        System.out.println(selectedUser.getId());
+        System.out.println(selectedUser.getName());
+        System.out.println(selectedUser.getPassword());
     }
 }
