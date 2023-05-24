@@ -3,23 +3,15 @@ package com.example.tobyspring3.dao;
 import com.example.tobyspring3.domain.User;
 
 import java.sql.*;
-import java.util.Map;
-
-import static java.lang.System.getenv;
 
 public abstract class UserDao {
-
     public abstract Connection getConnection() throws ClassNotFoundException, SQLException;
-    public void add(User user) throws ClassNotFoundException, SQLException {
-        Map<String, String> env = getenv();
-        String dbHost = env.get("DB_HOST"); //DB_HOST=jdbc:mysql://localhost:3306/spring-db
-        String dbUser = env.get("DB_USER");
-        String dbPassword = env.get("DB_PASSWORD");
 
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection conn = DriverManager.getConnection(
-                dbHost, dbUser, dbPassword
-        );
+    SimpleConnectionMaker connectionMaker = new SimpleConnectionMaker();
+
+    public void add(User user) throws ClassNotFoundException, SQLException {
+
+        Connection conn = connectionMaker.makeNewConnection();
         PreparedStatement pstmt = conn.prepareStatement("insert into users(id, name, password) values(?, ?, ?)");
         pstmt.setString(1, user.getId());
         pstmt.setString(2, user.getName());
@@ -32,15 +24,7 @@ public abstract class UserDao {
     }
 
     public User get(String id) throws ClassNotFoundException, SQLException {
-        Map<String, String> env = getenv();
-        String dbHost = env.get("DB_HOST"); //DB_HOST=jdbc:mysql://localhost:3306/spring-db
-        String dbUser = env.get("DB_USER");
-        String dbPassword = env.get("DB_PASSWORD");
-
-        Class.forName("com.mysql.cj.jdbc.Driver");
-        Connection conn = DriverManager.getConnection(
-                dbHost, dbUser, dbPassword
-        );
+        Connection conn = connectionMaker.makeNewConnection();
 
         PreparedStatement pstmt = conn.prepareStatement("select id, name, password from users where id = ?");
         pstmt.setString(1, id);
@@ -60,16 +44,23 @@ public abstract class UserDao {
     }
 
     public static void main(String[] args) throws SQLException, ClassNotFoundException {
-        UserDao userDao = new NUserDao();
+        UserDao userDao = new UserDao() {
+            @Override
+            public Connection getConnection() throws ClassNotFoundException, SQLException {
+                return null;
+            }
+        };
         User user = new User();
-        user.setId("4");
-        user.setName("KIM");
+        user.setId("6");
+        user.setName("kyo");
         user.setPassword("1234");
         userDao.add(user);
 
-        User selectedUser = userDao.get("3");
+        User selectedUser = userDao.get("6");
         System.out.println(selectedUser.getId());
         System.out.println(selectedUser.getName());
         System.out.println(selectedUser.getPassword());
     }
+
+
 }
